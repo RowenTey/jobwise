@@ -70,6 +70,8 @@ export async function apiRequest<T>(
 
   const text = await res.text();
   if (!text) return undefined as T;
+  const num = Number(text);
+  if (!Number.isNaN(num)) return num as unknown as T;
   return text as unknown as T;
 }
 
@@ -97,6 +99,8 @@ export async function logout() {
       method: "POST",
       body: JSON.stringify({ refreshToken: refresh }),
     });
+  } catch {
+    // Best-effort — tokens cleared below regardless
   } finally {
     clearTokens();
   }
