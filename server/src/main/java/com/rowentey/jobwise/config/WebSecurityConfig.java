@@ -27,50 +27,53 @@ import com.rowentey.jobwise.middleware.JwtFilter;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
-    @Bean
-    protected SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter, ApiKeyFilter apiKeyFilter)
-            throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/v3/**",
-                        "/swagger-ui/**", "/favicon.ico", "/api/v1/auth/**", "/actuator/health/**")
-                        .permitAll().anyRequest().authenticated())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(apiKeyFilter, JwtFilter.class);
-        return http.build();
-    }
+        @Bean
+        protected SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter,
+                        ApiKeyFilter apiKeyFilter)
+                        throws Exception {
+                http.csrf(AbstractHttpConfigurer::disable)
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .sessionManagement(
+                                                session -> session
+                                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/v3/**",
+                                                "/swagger-ui/**", "/favicon.ico", "/api/v1/auth/**",
+                                                "/actuator/health/**")
+                                                .permitAll().anyRequest().authenticated())
+                                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                                .addFilterBefore(apiKeyFilter, JwtFilter.class);
+                return http.build();
+        }
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(10);
-    }
+        @Bean
+        PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder(10);
+        }
 
-    @Bean
-    AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder) {
-        return new ProviderManager(
-                Arrays.asList(authenticationProvider(userDetailsService, passwordEncoder)));
-    }
+        @Bean
+        AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
+                        PasswordEncoder passwordEncoder) {
+                return new ProviderManager(
+                                Arrays.asList(authenticationProvider(userDetailsService, passwordEncoder)));
+        }
 
-    CorsConfigurationSource corsConfigurationSource() {
-        // TODO: Update allowed origins
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080")); // Allow all origins
-        configuration
-                .setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*")); // Allow all headers
+        CorsConfigurationSource corsConfigurationSource() {
+                // TODO: Update allowed origins
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(Arrays.asList("*")); // Allow all origins
+                configuration
+                                .setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                configuration.setAllowedHeaders(Arrays.asList("*")); // Allow all headers
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 
-    AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder);
-        return authProvider;
-    }
+        AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
+                        PasswordEncoder passwordEncoder) {
+                DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+                authProvider.setPasswordEncoder(passwordEncoder);
+                return authProvider;
+        }
 }
