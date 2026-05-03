@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="../css/index.css" />
+  <script type="module" src="../dist/settings.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Settings</h1>
+    <form id="settingsForm">
+      <fieldset>
+        <legend>API Connection</legend>
+        <label for="apiUrl">API Base URL <span class="required">*</span></label>
+        <input type="url" id="apiUrl" placeholder="http://localhost:8080/api/v1" required />
+
+        <label for="apiKey">API Key <span class="required">*</span></label>
+        <input type="text" id="apiKey" placeholder="Paste your API key" required />
+      </fieldset>
+
+      <fieldset>
+        <legend>Profile (for auto-fill)</legend>
+        <label for="name">Full Name</label>
+        <input type="text" id="name" placeholder="Jane Doe" />
+
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="jane@example.com" />
+
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" placeholder="+1 555-123-4567" />
+
+        <label for="linkedInUrl">LinkedIn Profile URL</label>
+        <input type="url" id="linkedInUrl" placeholder="https://linkedin.com/in/janedoe" />
+      </fieldset>
+
+      <p id="statusMessage"></p>
+
+      <button type="submit" id="submitBtn">Save Settings</button>
+    </form>
+
+    <button id="backBtn">Back</button>
+  </div>
+</body>
+</html>
