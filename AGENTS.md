@@ -3,7 +3,7 @@
 ## Repo layout
 - `server/` — Spring Boot 3 backend (Java 17, Maven).
 - `client/` — React 18 + Vite + TypeScript + Tailwind CSS v4 + shadcn/ui frontend.
-- `extension/` — Chrome Extension (Manifest V3), static HTML/JS, no build step.
+- `extension/` — Browser Extension (Manifest V3), TypeScript source compiled to `dist/` via `tsc`.
 
 ---
 
@@ -26,7 +26,7 @@
   - Signup: `POST /api/v1/auth/signup` → `201 Created` with **no body** (client calls login after signup).
   - Refresh: `POST /api/v1/auth/refresh`, Logout: `POST /api/v1/auth/logout`.
   - OAuth: `POST /api/v1/auth/oauth/{provider}` (supports `google` and `github`).
-  - API Keys: `POST/GET /api/v1/auth/api-keys`, `DELETE /api/v1/auth/api-keys/{id}`.
+  - API Keys: `POST/GET /api/v1/apiKeys`, `DELETE /api/v1/apiKeys/{id}`, `POST /api/v1/apiKeys/validate`.
 - **Extension auth**: API keys via `X-API-Key` header (filtered before JWT via `ApiKeyFilter`). JWT Bearer also works (`JwtFilter`).
 - **Applications**:
   - `GET /api/v1/applications` — list user's apps (filterable: status, jobId, companyId, fromDate, toDate, page, size, sort, direction).
@@ -34,7 +34,7 @@
   - `PATCH /api/v1/applications/{id}/status` — update status only (403 if not owner).
 - **Companies**: `GET /api/v1/companies` (paginated list only — no CRUD endpoints exposed).
 - **Jobs**: `GET /api/v1/jobs` (paginated list only — no CRUD endpoints exposed).
-- **CORS**: Hardcoded to `http://localhost:8080` only (`WebSecurityConfig`). TODO comment says "Update allowed origins".
+- **CORS**: Allows all origins (`WebSecurityConfig`).
 - **Codegen**: MapStruct + Lombok annotation processors configured; generated mappers land in `target/generated-sources/annotations`.
 - **Response DTOs**: Use MapStruct mappers (e.g. `ApiKeyMapper`) for entity→dto mapping. Prefer constructor-based DTOs (`@Getter` + `@AllArgsConstructor`) over `@Data` with setters.
 - **Dockerfile mismatch**: `server/Dockerfile` references `target/application-tracker-server-0.0.1-SNAPSHOT.jar`, but Maven builds `target/jobwise-0.0.1-SNAPSHOT.jar`. Update `ARG JAR_FILE` before building.
@@ -80,38 +80,43 @@
   - 401 interceptor: refresh token → retry once → redirect to login
   - Non-JSON response handling (raw numbers, empty bodies)
 - **Types** (`types/index.ts`): `ApplicationDto`, `JobDto`, `CompanyDto`, `ApiKeyResponse`, `ApplicationCreateRequest`, `PaginatedResponse<T>`, enum types.
-- **Tests**: 38 tests (Vitest + testing-library + jsdom). Run `npm test` to verify.
+- **Tests**: 39 tests (Vitest + testing-library + jsdom). Run `npm test` to verify.
   - `lib/api.test.ts` — fetch wrapper, response parsing, auth flows, all endpoint helpers
   - `context/AuthContext.test.tsx` — login/signup/logout state transitions
-  - `components/applications/StatusBadge.test.tsx` — renders all 6 status values
+  - `components/applications/StatusBadge.test.tsx` — renders all 7 status values
   - `pages/LoginPage.test.tsx` — form rendering, validation, auth redirect
   - `pages/SignupPage.test.tsx` — form rendering, password mismatch, submission, auth redirect
 
 ---
 
 ## Extension (`extension/`)
-- Chrome Extension Manifest V3. No build step.
-- **Structure**: 6 JS files (`content.js`, `background.js`, `popup.js`, `login.js`, `applications.js`, `application.js`), 4 HTML templates, 1 CSS file.
-- **Permissions declared**: `activeTab`, `alarms`, `storage`, `notifications`. Only `storage` is used.
-- **Content script** (`js/content.js`): injected on `https://www.linkedin.com/jobs/*`.
-  - Checks `jwtToken` in `chrome.storage.local` on load.
-  - Detects "Apply" button clicks via CSS selectors (`.jobs-apply-button--top-card`, `.jobs-apply-button`, text matching "apply").
-  - Scrapes job details: title, company, URL, job type, description.
+- **Stack**: TypeScript, no bundler — `tsc` compiles `src/*.ts` → `dist/*.js`.
+- **Build**: `npm run build` (runs `tsc`). `npm run watch` for watch mode.
+- **Structure**: 8 TypeScript source files (`src/`), 4 HTML templates (`templates/`), 1 CSS file (`css/`).
+- **Manifests**: Two variants — `manifest.json` (Firefox, uses `background.scripts`) and `manifest.chrome.json` (Chrome, uses `background.service_worker` + `host_permissions`).
+- **Permissions**: `manifest.json` retains `activeTab` + `storage`. `manifest.chrome.json` uses only `storage`.
+- **Auth**: API Key via `X-API-Key` header (no JWT). User configures key + URL in settings page.
+- **Settings** (`templates/settings.html` + `src/settings.ts`):
+  - API Base URL (required, user-configurable, no hardcoded default).
+  - API Key (required, validated via `POST /apiKeys/validate` on save).
+  - Profile: name, email, phone, LinkedIn URL (for auto-fill).
+  - All stored in `chrome.storage.local`.
+  - Back button navigates to `popup.html`.
+- **Popup** (`templates/popup.html` + `src/popup.ts`): Dynamically creates buttons (Settings, Applications, Clear Key) based on whether an API key is stored. No static HTML buttons.
+- **Content script** (`src/content.ts`): injected on `https://www.linkedin.com/jobs/*`.
+  - Checks API key in storage on load.
+  - Detects "Apply" button clicks via text content matching "apply", walking up DOM ancestors (`isApplyButton()`).
+  - Scrapes job details: title (`a[href*="/jobs/view/"]`), company (`[aria-label*="Company,"]`), description (`[data-testid="expandable-text-box"]`), location, job type, external apply URL (unwraps LinkedIn `/safety/go/` redirect).
+  - Builds server-compatible `ApplicationCreateRequest` payload (nested `company` + `job`).
   - Sends `chrome.runtime.sendMessage({ type: "SAVE_JOB", payload })` to background.
-  - **Dead code**: `isSubmitApplication()` is defined but never called.
-- **Background** (`js/background.js`): Single message listener for `"SAVE_JOB"` — POSTs to `/api/v1/applications` with Bearer token.
-- **Popup** (`templates/popup.html` + `js/popup.js`): Shows current user (Guest or decoded JWT sub). Links: Login, Update Application, Logout.
-- **Login** (`templates/login.html` + `js/login.js`): Username/password form → POST `/api/v1/auth/login` → stores JWT in `chrome.storage.local`.
-- **Applications list** (`templates/applications.html` + `js/applications.js`): GET `/api/v1/applications?userId={userId}` → renders cards, click to update.
-- **Application detail/update** (`templates/application.html` + `js/application.js`): Shows job details, allows updating any field (PUT to `/api/v1/applications/{id}`) or deleting (DELETE `/api/v1/applications/{id}`).
-  - Implicit global: `jsonData` assigned without `let`/`const`.
-  - **XSS risk**: Uses `innerHTML` with scraped/scraped data.
-- **API URL hardcoded** in 4 files (`background.js`, `login.js`, `applications.js`, `application.js`):
-  ```js
-  const url = "http://172.171.242.107:80/api/v1";
-  ```
-- **`getToken()` duplicated** across `content.js`, `background.js`, `popup.js`, `applications.js`, `application.js`.
-- **`displayToast()` duplicated** across `content.js` and `application.js`.
+  - Shows toast on success/failure.
+  - Auto-fills LinkedIn Easy Apply forms: detects modal via `MutationObserver`, matches form fields by label text (name, email, phone, LinkedIn URL), fills from stored profile.
+- **Background** (`src/background.ts`): Single message listener for `"SAVE_JOB"` — reads API key + URL from `chrome.storage.local` (inline storage logic, no imports from `shared.ts`), POSTs to `/applications` with `X-API-Key` header.
+- **Applications list** (`templates/applications.html` + `src/applications.ts`): `GET /applications?size=100` → renders centered cards (job title, company, status badge). Click passes base64-encoded app ID to detail page.
+- **Application detail** (`templates/application.html` + `src/application.ts`): Decodes app ID from query param, fetches all apps and filters client-side (no `GET /applications/{id}` endpoint). Shows job details + status dropdown → `PATCH /applications/{id}/status`.
+- **Shared utilities** (`src/shared.ts`): Single source for `getApiKey()`, `getApiUrl()`, `getProfile()`, `getSettings()`, `saveSettings()`, `apiRequest()`, `fetchApplications()`, `createApplication()`, `updateApplicationStatus()`, `validateApiKey()`, `displayToast()`, `getElementById()`.
+- **DTOs** (`src/types.ts`): Matches server DTOs exactly (`ApplicationDto`, `JobDto`, `CompanyDto`, `ApplicationCreateRequest`, `UpdateStatusRequest`, `PaginatedResponse`, `ExtensionSettings`, `UserProfile`).
+- **Security**: No `innerHTML` with scraped data. No JWT decoding client-side. No hardcoded IP addresses. No implicit globals.
 
 ---
 
@@ -126,28 +131,15 @@
 
 ### Critical (blocks functionality)
 - **Resume endpoints missing**: Client previously called `POST /resumes`, `GET /resumes`, `GET /resumes/{id}`, `GET /resumes/file/{id}`, `POST /gemini/resume` — none exist on server. **Client was reinit'd without these pages**. Server `.gitignore` still ignores `resumes/` directory.
-- **Application full-update missing**: Client sends `PUT /applications/{id}` with full body; server only has `PATCH /applications/{id}/status`. No full-update endpoint exists (`ApplicationMapper.updateEntity` is commented out). Old extension still relies on this.
-- **Extension API URL hardcoded to production IP** in 4 files. Must be updated to env-configurable or `localhost:8080`.
-- **CORS blocks extension**: `WebSecurityConfig` only allows `http://localhost:8080`. Extension `chrome-extension://` origin is rejected.
+- **Application full-update missing**: Client sends `PUT /applications/{id}` with full body; server only has `PATCH /applications/{id}/status`. No full-update endpoint exists (`ApplicationMapper.updateEntity` is commented out). Extension reinit'd to only use PATCH status.
 - **Dockerfile JAR name mismatch**: `server/Dockerfile` expects `application-tracker-server-0.0.1-SNAPSHOT.jar`, Maven builds `jobwise-0.0.1-SNAPSHOT.jar`.
 - **Client Dockerfile**: Old `client/Dockerfile` was deleted during reinit. A new one needs to be created for production deployment.
 
 ### Auth & Security
 - **Server signup hardcodes default role "ADMIN"** in `AuthService.java` (line 49: `// TODO: Think through this flow`).
-- **Extension XSS risk**: `innerHTML` used to render scraped job data in `application.js` and `applications.js`.
-- **Extension JWT decoded client-side**: `atob(token.split(".")[1])` assumes JWT payload format, no validation.
-- **Extension login password**: No `required` attribute, no minimum-length validation.
 - **`ApplicationStatus.fromString()` returns `null`** for invalid values instead of throwing — invalid status filter silently returns all records.
-- **OAuth credentials default to empty** — must be set via env vars for OAuth to work.
-
-### Extension issues
-- **Dead code**: `isSubmitApplication()` in `content.js` never called. `alarms` and `notifications` permissions declared but unused.
-- **`getToken()` duplicated** across 5 files; `displayToast()` duplicated across 2 files.
-- **Implicit global**: `jsonData` in `application.js` assigned without `let`/`const`.
-- **Brittle LinkedIn selectors**: DOM-dependent; any LinkedIn UI change breaks scraping.
-- **No refresh token handling**: Only `jwtToken` (access) is stored; no refresh flow.
-- **API URL hardcoded**: All API calls in extension point to production IP.
-- **User ID extracted client-side**: Decodes JWT to get `userId`; no validation.
+- **OAuth credentials default to `123`** in `application.yml` — must be set via env vars for OAuth to work.
+- **JwtFilter** catches invalid/malformed JWTs and resolves them via `HandlerExceptionResolver` → `RestExceptionHandler` returning 401 JSON (not 403).
 
 ### Server issues
 - **`GEMINI_API_KEY` missing from `.env.example`** — present in CI secrets but not in template.
@@ -162,6 +154,6 @@
 - **No `docker-compose.yml`** for unified local development.
 - **No CI for `extension/`** directory.
 - **No root-level `package.json` or orchestration**.
-- **`.vscode/launch.json` is empty** — no debug configurations.
+- **`.vscode/launch.json`** has a Java debug config for `jobwise-be`.
 - **No client Dockerfile** — was removed during reinit.
 - **Client workflow will fail** — references old `client/` structure; needs update for new build process.

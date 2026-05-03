@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Jobwise BE",
+            "request": "launch",
+            "mainClass": "com.rowentey.jobwise.JobwiseApplication",
+            "projectName": "jobwise-be",
+            "cwd": "${workspaceFolder}/server"
+        }
+    ]
+}

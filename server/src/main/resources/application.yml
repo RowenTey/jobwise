@@ -20,11 +20,11 @@ jwt:
 
 oauth:
   google:
-    client-id: ${GOOGLE_CLIENT_ID:}
-    client-secret: ${GOOGLE_CLIENT_SECRET:}
+    client-id: ${GOOGLE_CLIENT_ID:123}
+    client-secret: ${GOOGLE_CLIENT_SECRET:123}
   github:
-    client-id: ${GITHUB_CLIENT_ID:}
-    client-secret: ${GITHUB_CLIENT_SECRET:}
+    client-id: ${GITHUB_CLIENT_ID:123}
+    client-secret: ${GITHUB_CLIENT_SECRET:123}
 
 management:
   endpoints:

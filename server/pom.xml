@@ -11,8 +11,8 @@
 	
 	<groupId>com.rowentey</groupId>
 	<artifactId>jobwise</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>jobwise</name>
+	<version>0.0.1</version>
+	<name>jobwise-be</name>
 	<description>Backend for JobWise</description>
 	<properties>
 		<java.version>17</java.version>
