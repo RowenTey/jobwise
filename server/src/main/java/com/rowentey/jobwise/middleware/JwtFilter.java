@@ -1,6 +1,7 @@
 package com.rowentey.jobwise.middleware;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -9,7 +10,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
+import com.rowentey.jobwise.exceptions.AuthExceptions.InvalidJwtException;
 import com.rowentey.jobwise.utils.JwtUtil;
 
 import jakarta.servlet.FilterChain;
@@ -26,6 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final List<HandlerExceptionResolver> handlerExceptionResolvers;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -44,22 +48,34 @@ public class JwtFilter extends OncePerRequestFilter {
                 username = jwtUtil.extractUsername(token);
             } catch (Exception ex) {
                 log.warn("Invalid JWT provided: {}", ex.getMessage());
+                resolveException(request, response, new InvalidJwtException("Invalid JWT token"));
+                return;
             }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            log.debug("Validating token: " + token + " for user: " + userDetails.getUsername());
             if (jwtUtil.validateToken(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
                         token,
                         userDetails.getAuthorities());
-                log.debug("Token validated, setting authentication...");
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                log.warn("JWT validation failed for user: {}", username);
+                resolveException(request, response, new InvalidJwtException("Invalid JWT token"));
+                return;
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void resolveException(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+        for (HandlerExceptionResolver resolver : handlerExceptionResolvers) {
+            if (resolver.resolveException(request, response, null, ex) != null) {
+                break;
+            }
+        }
     }
 }

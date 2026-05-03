@@ -1,17 +1,17 @@
 package com.rowentey.jobwise.config;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
 import com.rowentey.jobwise.dto.ErrorResponse;
+import com.rowentey.jobwise.exceptions.AuthExceptions.InvalidJwtException;
 import com.rowentey.jobwise.exceptions.ForbiddenException;
 import com.rowentey.jobwise.exceptions.InvalidApiKeyException;
 
 import jakarta.persistence.EntityNotFoundException;
-
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -31,6 +31,12 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(InvalidApiKeyException.class)
     public ResponseEntity<ErrorResponse> handleInvalidApiKeyException(InvalidApiKeyException ex) {
+        return new ResponseEntity<>(new ErrorResponse(ex.getMessage()),
+                HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(InvalidJwtException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidJwtException(InvalidJwtException ex) {
         return new ResponseEntity<>(new ErrorResponse(ex.getMessage()),
                 HttpStatus.UNAUTHORIZED);
     }

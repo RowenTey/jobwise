@@ -18,4 +18,10 @@ public class AuthExceptions {
             super(message);
         }
     }
+
+    public static class InvalidJwtException extends RuntimeException {
+        public InvalidJwtException(String message) {
+            super(message);
+        }
+    }
 }
