@@ -38,6 +38,7 @@ public class WebSecurityConfig {
                                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(authorize -> authorize.requestMatchers("/v3/**",
                                                 "/swagger-ui/**", "/favicon.ico", "/api/v1/auth/**",
+                                                "/api/v1/apiKeys/validate",
                                                 "/actuator/health/**")
                                                 .permitAll().anyRequest().authenticated())
                                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

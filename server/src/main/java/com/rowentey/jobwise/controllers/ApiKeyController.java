@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +25,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("api/v1/auth/api-keys")
+@RequestMapping("api/v1/apiKeys")
 @RequiredArgsConstructor
 @Tag(name = "API Keys", description = "API Key APIs")
 public class ApiKeyController {
@@ -53,5 +54,12 @@ public class ApiKeyController {
             @AuthenticationPrincipal User user) {
         apiKeyService.revokeKey(id, user);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Validate an API key")
+    @PostMapping("/validate")
+    public ResponseEntity<Void> validateKey(@RequestHeader("X-API-Key") String apiKey) {
+        apiKeyService.validateKey(apiKey);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,4 +1,4 @@
-import type { PaginatedResponse, ApplicationDto, ApiKeyResponse, ApplicationCreateRequest, ApplicationStatus } from "../types";
+import type { ApiKeyResponse, ApplicationCreateRequest, ApplicationDto, ApplicationStatus, PaginatedResponse } from "../types";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080/api/v1";
 
@@ -49,6 +49,7 @@ export async function apiRequest<T>(
   let res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
 
   if (res.status === 401 && access) {
+    console.warn("Access token expired, attempting to refresh...");
     const newAccess = await refreshAccessToken();
     if (newAccess) {
       headers["Authorization"] = `Bearer ${newAccess}`;
@@ -137,16 +138,16 @@ export async function createApplication(request: ApplicationCreateRequest) {
 }
 
 export async function fetchApiKeys() {
-  return apiRequest<ApiKeyResponse[]>("/auth/api-keys");
+  return apiRequest<ApiKeyResponse[]>("/apiKeys");
 }
 
 export async function createApiKey(name: string) {
-  return apiRequest<ApiKeyResponse>("/auth/api-keys", {
+  return apiRequest<ApiKeyResponse>("/apiKeys", {
     method: "POST",
     body: JSON.stringify({ name }),
   });
 }
 
 export async function revokeApiKey(id: number) {
-  return apiRequest<void>(`/auth/api-keys/${id}`, { method: "DELETE" });
+  return apiRequest<void>(`/apiKeys/${id}`, { method: "DELETE" });
 }

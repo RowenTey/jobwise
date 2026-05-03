@@ -323,6 +323,6 @@ describe("fetchApiKeys / revokeApiKey", () => {
     await revokeApiKey(3);
 
     const [url] = fetch.mock.calls[0];
-    expect(url).toContain("/auth/api-keys/3");
+    expect(url).toContain("/apiKeys/3");
   });
 });
