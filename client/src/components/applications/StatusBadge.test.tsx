@@ -4,6 +4,7 @@ import StatusBadge from "./StatusBadge";
 import type { ApplicationStatus } from "../../types";
 
 const statuses: ApplicationStatus[] = [
+  "VIEWED",
   "APPLIED",
   "ASSESSMENT",
   "INTERVIEW",

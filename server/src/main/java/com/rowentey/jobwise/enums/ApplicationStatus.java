@@ -3,7 +3,7 @@ package com.rowentey.jobwise.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 public enum ApplicationStatus {
-    APPLIED("Applied"), ASSESSMENT("Assessment"), INTERVIEW("Interview"), REJECTED(
+    VIEWED("Viewed"), APPLIED("Applied"), ASSESSMENT("Assessment"), INTERVIEW("Interview"), REJECTED(
             "Rejected"), OFFERED("Offered"), GHOSTED("Ghosted");
 
     private final String status;

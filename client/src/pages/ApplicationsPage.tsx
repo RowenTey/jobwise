@@ -17,6 +17,7 @@ type ViewMode = "table" | "kanban";
 
 const statuses: Array<{ value: ApplicationStatus | "ALL"; label: string }> = [
   { value: "ALL", label: "All Statuses" },
+  { value: "VIEWED", label: "Viewed" },
   { value: "APPLIED", label: "Applied" },
   { value: "ASSESSMENT", label: "Assessment" },
   { value: "INTERVIEW", label: "Interview" },

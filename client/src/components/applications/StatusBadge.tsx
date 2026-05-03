@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import type { ApplicationStatus } from "@/types";
 
 const statusVariant: Record<ApplicationStatus, "default" | "secondary" | "destructive" | "outline"> = {
+  VIEWED: "secondary",
   APPLIED: "secondary",
   ASSESSMENT: "default",
   INTERVIEW: "default",
@@ -11,6 +12,7 @@ const statusVariant: Record<ApplicationStatus, "default" | "secondary" | "destru
 };
 
 const statusColor: Record<ApplicationStatus, string> = {
+  VIEWED: "",
   APPLIED: "",
   ASSESSMENT: "bg-blue-500 hover:bg-blue-600 text-white",
   INTERVIEW: "bg-purple-500 hover:bg-purple-600 text-white",

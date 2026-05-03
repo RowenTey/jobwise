@@ -44,7 +44,7 @@ public class Application {
     private Job job;
 
     @Enumerated(EnumType.STRING)
-    private ApplicationStatus status = ApplicationStatus.APPLIED;
+    private ApplicationStatus status = ApplicationStatus.VIEWED;
 
     private String notes;
 

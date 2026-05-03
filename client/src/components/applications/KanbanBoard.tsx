@@ -13,6 +13,7 @@ import type { ApplicationDto, ApplicationStatus } from "@/types";
 import KanbanColumn from "./KanbanColumn";
 
 const statuses: ApplicationStatus[] = [
+  "VIEWED",
   "APPLIED",
   "ASSESSMENT",
   "INTERVIEW",

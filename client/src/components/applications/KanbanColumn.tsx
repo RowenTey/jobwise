@@ -4,6 +4,7 @@ import KanbanCard from "./KanbanCard";
 import type { ApplicationDto, ApplicationStatus } from "@/types";
 
 const headerColors: Record<ApplicationStatus, string> = {
+  VIEWED: "bg-slate-400",
   APPLIED: "bg-slate-500",
   ASSESSMENT: "bg-blue-500",
   INTERVIEW: "bg-purple-500",
