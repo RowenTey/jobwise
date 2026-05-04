@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc --watch"
+    "build": "tsc --noEmit && esbuild src/content.ts src/background.ts src/popup.ts src/settings.ts src/applications.ts src/application.ts --bundle --outdir=dist --format=iife",
+    "watch": "esbuild src/content.ts src/background.ts src/popup.ts src/settings.ts src/applications.ts src/application.ts --bundle --outdir=dist --format=iife --watch"
   },
   "devDependencies": {
     "@types/chrome": "^0.1.40",
+    "esbuild": "^0.28.0",
     "typescript": "^5.7.0"
   }
 }

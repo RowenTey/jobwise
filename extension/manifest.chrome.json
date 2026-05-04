@@ -2,9 +2,16 @@
   "manifest_version": 3,
   "name": "JobWise",
   "version": "2.0",
-  "description": "Track job applications on LinkedIn and auto-fill Easy Apply forms.",
-  "permissions": ["storage"],
-  "host_permissions": ["<all_urls>"],
+  "description": "Track job applications across LinkedIn, Indeed, Greenhouse, and Lever.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.linkedin.com/jobs/*",
+    "https://*.indeed.com/*",
+    "https://boards.greenhouse.io/*",
+    "https://jobs.lever.co/*"
+  ],
   "icons": {
     "16": "assets/logo.png",
     "48": "assets/logo.png",
@@ -15,8 +22,15 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.linkedin.com/jobs/*"],
-      "js": ["dist/content.js"]
+      "matches": [
+        "https://www.linkedin.com/jobs/*",
+        "https://*.indeed.com/*",
+        "https://boards.greenhouse.io/*",
+        "https://jobs.lever.co/*"
+      ],
+      "js": [
+        "dist/content.js"
+      ],
     }
   ],
   "action": {

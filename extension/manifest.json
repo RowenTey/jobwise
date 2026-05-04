@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "JobWise",
-  "version": "1.0",
-  "description": "Track job applications on LinkedIn and auto-fill Easy Apply forms.",
+  "version": "2.0",
+  "description": "Track job applications across LinkedIn, Indeed, Greenhouse, and Lever.",
   "permissions": [
     "storage",
     "activeTab"
@@ -20,7 +20,10 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.linkedin.com/jobs/*"
+        "https://www.linkedin.com/jobs/*",
+        "https://*.indeed.com/*",
+        "https://boards.greenhouse.io/*",
+        "https://jobs.lever.co/*"
       ],
       "js": [
         "dist/content.js"
