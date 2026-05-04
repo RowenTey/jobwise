@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:sqlite:jobwise.db}
+    url: ${DB_URL:jdbc:sqlite:jobwise.db?journal_mode=WAL&temp_store=MEMORY&cache_size=-10000}
     driver-class-name: org.sqlite.JDBC
     username: ""
     password: ""

@@ -38,7 +38,7 @@ The server runs on port 8080 by default.
 
 | Variable | Default | Description |
 |---|---|---|
-| `DB_URL` | `jdbc:sqlite:jobwise.db` | JDBC URL |
+| `DB_URL` | `jdbc:sqlite:jobwise.db?journal_mode=WAL&temp_store=MEMORY&cache_size=-10000` | JDBC URL (see PRAGMAs section) |
 | `DB_USERNAME` | `""` | DB username |
 | `DB_PASSWORD` | `""` | DB password |
 | `JWT_SECRET` | `test` | JWT signing secret (insecure default) |
@@ -95,6 +95,18 @@ See `.env.example`.
 ## Database
 
 SQLite file (`jobwise.db` at repo root by default). Flyway migrations in `src/main/resources/db/migration`. V1 creates 7 tables: `users`, `companies`, `jobs`, `applications`, `refresh_tokens`, `user_oauth_accounts`, `api_keys`.
+
+### PRAGMAs
+
+The JDBC URL defaults to the following PRAGMAs for performance:
+
+| PRAGMA | Value | Effect |
+|---|---|---|
+| `journal_mode` | `WAL` | Write-Ahead Logging — concurrent reads during writes |
+| `temp_store` | `MEMORY` | Temp tables/indices stored in memory (faster, no I/O) |
+| `cache_size` | `-10000` | Page cache of ~10 MB (10,000 pages at 1 KB each) |
+
+To override, include your own PRAGMAs in the `DB_URL` env var, e.g. `jdbc:sqlite:jobwise.db?journal_mode=DELETE&temp_store=FILE`.
 
 ## Auth
 
