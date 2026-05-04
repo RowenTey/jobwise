@@ -36,11 +36,19 @@ public class WebSecurityConfig {
                                 .sessionManagement(
                                                 session -> session
                                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/v3/**",
-                                                "/swagger-ui/**", "/favicon.ico", "/api/v1/auth/**",
-                                                "/api/v1/apiKeys/validate",
-                                                "/actuator/health/**")
-                                                .permitAll().anyRequest().authenticated())
+                                .authorizeHttpRequests(authorize -> authorize
+                                                .requestMatchers("/v3/**", "/swagger-ui/**",
+                                                                "/api/v1/auth/**",
+                                                                "/api/v1/apiKeys/validate",
+                                                                "/actuator/health/**")
+                                                .permitAll()
+                                                .requestMatchers("/", "/index.html", "/assets/**",
+                                                                "/logo.png", "/favicon.svg",
+                                                                "/login", "/signup",
+                                                                "/api-keys", "/applications",
+                                                                "/applications/**")
+                                                .permitAll()
+                                                .anyRequest().authenticated())
                                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                                 .addFilterBefore(apiKeyFilter, JwtFilter.class);
                 return http.build();

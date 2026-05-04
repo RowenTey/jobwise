@@ -38,6 +38,7 @@
 - **Codegen**: MapStruct + Lombok annotation processors configured; generated mappers land in `target/generated-sources/annotations`.
 - **Response DTOs**: Use MapStruct mappers (e.g. `ApiKeyMapper`) for entity→dto mapping. Prefer constructor-based DTOs (`@Getter` + `@AllArgsConstructor`) over `@Data` with setters.
 - **Dockerfile mismatch**: `server/Dockerfile` references `target/application-tracker-server-0.0.1-SNAPSHOT.jar`, but Maven builds `target/jobwise-0.0.1-SNAPSHOT.jar`. Update `ARG JAR_FILE` before building.
+- **SPA serving**: Server can serve the React frontend from `src/main/resources/static/`. The `SpaFallbackController` forwards `/login`, `/signup`, `/applications/**`, `/api-keys` to `index.html` for client-side routing. Static files and SPA routes are `permitAll()` in `WebSecurityConfig`; API routes remain authenticated.
 - **Server README** has unrelated Nginx deployment instructions (not Spring Boot docs).
 
 ---
@@ -45,8 +46,8 @@
 ## Client (`client/`)
 - **Stack**: React 18 + TypeScript + Vite + Tailwind CSS v4 + shadcn/ui (Base UI v4).
 - **Package manager**: npm (`package-lock.json` present).
-- **Scripts**: `npm run dev` (port 80, host 0.0.0.0), `npm run build` (`tsc -b && vite build`), `npm run lint` (`eslint .`).
-- **Backend URL**: Configured via `VITE_API_BASE_URL` env var (default: `http://localhost:8080/api/v1`). See `.env.example`.
+- **Scripts**: `npm run dev` (port 80, host 0.0.0.0), `npm run build` (`tsc -b && vite build`, outputs to `client/dist/`), `npm run build:server` (`tsc -b && vite build`, outputs to `../server/src/main/resources/static/`), `npm run lint` (`eslint .`).
+- **Backend URL**: Configured via `VITE_API_BASE_URL` env var (default: `/api/v1` — relative, works when served same-origin). See `.env.example`.
 - **State**: React Context (`AuthContext`) + `localStorage` for tokens. No Redux.
   - Stores `accessToken` and `refreshToken`.
   - Auto-refreshes access token on 401 (via fetch wrapper) before redirecting to login.

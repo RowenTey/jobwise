@@ -12,7 +12,7 @@ import {
 } from "./api";
 import type { ApplicationCreateRequest, JobType } from "../types";
 
-const BASE_URL = "http://localhost:8080/api/v1";
+const BASE_URL = "/api/v1";
 
 function mockFetch(status: number, body: unknown, contentType?: string) {
   return vi.fn().mockResolvedValue({

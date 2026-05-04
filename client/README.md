@@ -17,17 +17,18 @@ React frontend for the JobWise job application tracker.
 
 ```bash
 npm install
-npm run dev       # Dev server on http://localhost:80
-npm run build     # tsc -b && vite build
-npm run lint      # ESLint
-npm test          # Vitest (40 tests)
+npm run dev          # Dev server on http://localhost:80
+npm run build        # tsc -b && vite build (outputs to client/dist/)
+npm run build:server # tsc -b && vite build (outputs to ../server/src/main/resources/static/)
+npm run lint         # ESLint
+npm test             # Vitest (40 tests)
 ```
 
 ## Environment Variables
 
 | Variable | Default | Description |
 |---|---|---|
-| `VITE_API_BASE_URL` | `http://localhost:8080/api/v1` | Backend API base URL |
+| `VITE_API_BASE_URL` | `/api/v1` | Backend API base URL (relative when served same-origin) |
 
 See `.env.example`.
 

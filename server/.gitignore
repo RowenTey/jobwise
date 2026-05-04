@@ -1,11 +1,14 @@
 HELP.md
 target/
+src/main/resources/static/
 resumes/
 resume.*
 *.pem
 *.env
 cmd.txt
 jobwise.db
+*.db-shm
+*.db-wal
 
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/

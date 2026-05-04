@@ -29,6 +29,22 @@ mvn package
 
 The server runs on port 8080 by default.
 
+## Serving the Frontend (SPA)
+
+The server can serve the React frontend as a single-page application from the same origin:
+
+```bash
+# 1. Build the frontend into server/src/main/resources/static/
+cd client && npm run build:server
+
+# 2. Start the server (serves both API and frontend)
+cd ../server && mvn spring-boot:run
+
+# 3. Open http://localhost:8080
+```
+
+Static resources (`index.html`, JS/CSS bundles, assets) and frontend routes (`/login`, `/signup`, `/applications/*`, `/api-keys`) are permitted without authentication. API endpoints under `/api/v1` remain protected by JWT or API Key auth.
+
 ## Services
 
 - AuthService, RefreshTokenService, OAuthService, UserService, ApiKeyService
