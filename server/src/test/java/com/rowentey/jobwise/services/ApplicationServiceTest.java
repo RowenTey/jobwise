@@ -58,6 +58,47 @@ class ApplicationServiceTest {
     }
 
     @Test
+    void getApplicationById_shouldSucceed() {
+        User user = user(1L);
+        Application application = application(5L, user);
+        ApplicationDto expectedDto = new ApplicationDto();
+        expectedDto.setId(5L);
+        expectedDto.setStatus(ApplicationStatus.APPLIED);
+
+        when(applicationRepository.findById(5L)).thenReturn(Optional.of(application));
+        when(applicationMapper.toDto(application)).thenReturn(expectedDto);
+
+        ApplicationDto result = applicationService.getApplicationById(user, 5L);
+
+        assertEquals(5L, result.getId());
+        assertEquals(ApplicationStatus.APPLIED, result.getStatus());
+        verify(applicationRepository).findById(5L);
+    }
+
+    @Test
+    void getApplicationById_shouldThrowEntityNotFoundException() {
+        User user = user(1L);
+        when(applicationRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class,
+                () -> applicationService.getApplicationById(user, 99L));
+        verify(applicationRepository).findById(99L);
+    }
+
+    @Test
+    void getApplicationById_shouldThrowForbiddenExceptionWhenNotOwner() {
+        User owner = user(1L);
+        User otherUser = user(2L);
+        Application application = application(5L, owner);
+
+        when(applicationRepository.findById(5L)).thenReturn(Optional.of(application));
+
+        assertThrows(ForbiddenException.class,
+                () -> applicationService.getApplicationById(otherUser, 5L));
+        verify(applicationRepository).findById(5L);
+    }
+
+    @Test
     void createApplication_shouldReturnNewId() {
         User user = user(1L);
         ApplicationCreateRequest request = new ApplicationCreateRequest();

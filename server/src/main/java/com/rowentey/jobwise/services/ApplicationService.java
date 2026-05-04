@@ -70,6 +70,17 @@ public class ApplicationService {
                 .map(applicationMapper::toDto);
     }
 
+    public ApplicationDto getApplicationById(User user, Long id) {
+        Application application = applicationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Application with ID " + id + " not found"));
+
+        if (!application.getUser().getId().equals(user.getId())) {
+            throw new ForbiddenException("Application does not belong to the current user");
+        }
+
+        return applicationMapper.toDto(application);
+    }
+
     @Transactional
     public Long createApplication(
             User user, ApplicationCreateRequest request) {

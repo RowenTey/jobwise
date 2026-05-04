@@ -20,5 +20,6 @@ public class ApplicationDto {
     private JobDto job;
     private ApplicationStatus status;
     private String notes;
+    private LocalDateTime createdAt;
     private LocalDateTime lastUpdated;
 }

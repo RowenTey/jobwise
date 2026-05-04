@@ -54,6 +54,19 @@ public class ApplicationController {
                                 jobId, companyId, fromDate, toDate, page, size, sort, direction));
         }
 
+        @Operation(summary = "Get an application by ID")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Successful operation", content = {
+                                        @Content(mediaType = "application/json", schema = @Schema(implementation = ApplicationDto.class)) }),
+                        @ApiResponse(responseCode = "404", description = "Application not found"),
+                        @ApiResponse(responseCode = "403", description = "Application does not belong to the current user") })
+        @GetMapping("/{id}")
+        public ResponseEntity<ApplicationDto> getApplicationById(
+                        @PathVariable Long id,
+                        @AuthenticationPrincipal User user) {
+                return ResponseEntity.ok(applicationService.getApplicationById(user, id));
+        }
+
         @Operation(summary = "Create a new application")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "201", description = "Application created successfully", content = {
