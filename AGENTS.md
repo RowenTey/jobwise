@@ -3,7 +3,7 @@
 ## Repo layout
 - `server/` — Spring Boot 3 backend (Java 17, Maven).
 - `client/` — React 18 + Vite + TypeScript + Tailwind CSS v4 + shadcn/ui frontend.
-- `extension/` — Browser Extension (Manifest V3), TypeScript source compiled to `dist/` via `tsc`.
+- `extension/` — Browser Extension (Manifest V3), TypeScript source compiled to `dist/` via `tsc` + `esbuild`.
 
 ---
 
@@ -90,11 +90,11 @@
 ---
 
 ## Extension (`extension/`)
-- **Stack**: TypeScript, no bundler — `tsc` compiles `src/*.ts` → `dist/*.js`.
-- **Build**: `npm run build` (runs `tsc`). `npm run watch` for watch mode.
-- **Structure**: 8 TypeScript source files (`src/`), 4 HTML templates (`templates/`), 1 CSS file (`css/`).
+- **Stack**: TypeScript. Build via `tsc --noEmit` (type-check) + `esbuild --bundle` (output to IIFE).
+- **Build**: `npm run build` (type-check + bundle). `npm run watch` uses esbuild in watch mode.
+- **Structure**: 14 TypeScript source files (`src/` + `src/extractors/`), 4 HTML templates (`templates/`), 1 CSS file (`css/`).
 - **Manifests**: Two variants — `manifest.json` (Firefox, uses `background.scripts`) and `manifest.chrome.json` (Chrome, uses `background.service_worker` + `host_permissions`).
-- **Permissions**: `manifest.json` retains `activeTab` + `storage`. `manifest.chrome.json` uses only `storage`.
+- **Permissions**: `manifest.json` has `activeTab` + `storage`. `manifest.chrome.json` has explicit `host_permissions` per site + `storage`.
 - **Auth**: API Key via `X-API-Key` header (no JWT). User configures key + URL in settings page.
 - **Settings** (`templates/settings.html` + `src/settings.ts`):
   - API Base URL (required, user-configurable, no hardcoded default).
@@ -103,18 +103,25 @@
   - All stored in `chrome.storage.local`.
   - Back button navigates to `popup.html`.
 - **Popup** (`templates/popup.html` + `src/popup.ts`): Dynamically creates buttons (Settings, Applications, Clear Key) based on whether an API key is stored. No static HTML buttons.
-- **Content script** (`src/content.ts`): injected on `https://www.linkedin.com/jobs/*`.
-  - Checks API key in storage on load.
-  - Detects "Apply" button clicks via text content matching "apply", walking up DOM ancestors (`isApplyButton()`).
-  - Scrapes job details: title (`a[href*="/jobs/view/"]`), company (`[aria-label*="Company,"]`), description (`[data-testid="expandable-text-box"]`), location, job type, external apply URL (unwraps LinkedIn `/safety/go/` redirect).
-  - Builds server-compatible `ApplicationCreateRequest` payload (nested `company` + `job`).
+- **Content script** (`src/content.ts`): Injected on LinkedIn, Indeed, Greenhouse, and Lever. Uses pluggable extractor architecture:
+  - Detects current site at load time via `getExtractor()` registry.
+  - Delegates `isApplyButton()` and `extractJobDetails()` to the matched extractor.
+  - Builds server-compatible `ApplicationCreateRequest` payload with `source` set to the extractor name.
   - Sends `chrome.runtime.sendMessage({ type: "SAVE_JOB", payload })` to background.
   - Shows toast on success/failure.
-  - Auto-fills LinkedIn Easy Apply forms: detects modal via `MutationObserver`, matches form fields by label text (name, email, phone, LinkedIn URL), fills from stored profile.
-- **Background** (`src/background.ts`): Single message listener for `"SAVE_JOB"` — reads API key + URL from `chrome.storage.local` (inline storage logic, no imports from `shared.ts`), POSTs to `/applications` with `X-API-Key` header.
+  - Auto-fills LinkedIn Easy Apply forms only: detects modal via `MutationObserver`, matches form fields by label text (name, email, phone, LinkedIn URL), fills from stored profile.
+- **Extractors** (`src/extractors/`):
+  - `base.ts` — `SiteExtractor` interface, `JobDetails` type, `FallbackExtractor` (generic JSON-LD + meta tag fallback for unsupported sites), `parseJsonLdJobPosting()` utility.
+  - `linkedin.ts` — `LinkedInExtractor`: scrapes title from `a[href*="/jobs/view/"]`, company from `[aria-label*="Company,"]`, description from `[data-testid="expandable-text-box"]`, location from time-ago paragraphs, unwraps `/safety/go/` redirects. Owns auto-fill logic (form selectors, profile field map, label matching).
+  - `indeed.ts` — `IndeedExtractor`: JSON-LD `JobPosting` first, then DOM fallbacks (`h1`, `[data-testid="company-name"]`, `#jobDescriptionText`). Apply button: "Apply now" / "Apply with Indeed".
+  - `greenhouse.ts` — `GreenhouseExtractor`: JSON-LD first, then `#header h1`, `.company-name`, `#content`. Apply button: exact text "Apply".
+  - `lever.ts` — `LeverExtractor`: JSON-LD first, then `.posting-headline h2`, `meta[property="og:site_name"]`, `.posting-description`. Company inferred from subdomain or OG meta.
+  - `index.ts` — Registry: hostname-checked array of extractors, falls back to `FallbackExtractor`.
+- **Adding a new site**: Create a new file in `src/extractors/` implementing `SiteExtractor`, add it to the array in `index.ts`, add the URL pattern to both manifests.
+- **Background** (`src/background.ts`): Single message listener for `"SAVE_JOB"` — reads API key + URL from `chrome.storage.local`, POSTs to `/applications` with `X-API-Key` header.
 - **Applications list** (`templates/applications.html` + `src/applications.ts`): `GET /applications?size=100` → renders centered cards (job title, company, status badge). Click passes base64-encoded app ID to detail page.
 - **Application detail** (`templates/application.html` + `src/application.ts`): Decodes app ID from query param, fetches all apps and filters client-side (no `GET /applications/{id}` endpoint). Shows job details + status dropdown → `PATCH /applications/{id}/status`.
-- **Shared utilities** (`src/shared.ts`): Single source for `getApiKey()`, `getApiUrl()`, `getProfile()`, `getSettings()`, `saveSettings()`, `apiRequest()`, `fetchApplications()`, `createApplication()`, `updateApplicationStatus()`, `validateApiKey()`, `displayToast()`, `getElementById()`.
+- **Shared utilities** (`src/shared.ts`): `getApiKey()`, `getApiUrl()`, `getProfile()`, `getSettings()`, `saveSettings()`, `apiRequest()`, `fetchApplications()`, `createApplication()`, `updateApplicationStatus()`, `validateApiKey()`, `displayToast()`, `getElementById()`.
 - **DTOs** (`src/types.ts`): Matches server DTOs exactly (`ApplicationDto`, `JobDto`, `CompanyDto`, `ApplicationCreateRequest`, `UpdateStatusRequest`, `PaginatedResponse`, `ExtensionSettings`, `UserProfile`).
 - **Security**: No `innerHTML` with scraped data. No JWT decoding client-side. No hardcoded IP addresses. No implicit globals.
 
