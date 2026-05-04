@@ -4,6 +4,7 @@ import {
   login,
   signup,
   logout,
+  fetchApplication,
   fetchApplications,
   createApplication,
   updateApplicationStatus,
@@ -244,6 +245,20 @@ describe("logout", () => {
 
     expect(localStorage.getItem("accessToken")).toBeNull();
     expect(localStorage.getItem("refreshToken")).toBeNull();
+  });
+});
+
+describe("fetchApplication", () => {
+  it("calls GET /applications/{id} and returns the application", async () => {
+    const app = { id: 5, source: "LinkedIn", status: "APPLIED", job: { title: "Engineer", company: { name: "Acme" } } };
+    vi.stubGlobal("fetch", mockFetch(200, app));
+
+    const result = await fetchApplication(5);
+
+    const [url, opts] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(url).toContain("/applications/5");
+    expect(opts.method ?? "GET").toBe("GET");
+    expect(result).toEqual(app);
   });
 });
 

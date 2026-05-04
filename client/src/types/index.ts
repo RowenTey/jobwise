@@ -40,6 +40,7 @@ export interface ApplicationDto {
   job: JobDto;
   status: ApplicationStatus;
   notes: string;
+  createdAt: string;
   lastUpdated: string;
 }
 

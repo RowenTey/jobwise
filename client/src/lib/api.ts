@@ -107,6 +107,10 @@ export async function logout() {
   }
 }
 
+export async function fetchApplication(id: number) {
+  return apiRequest<ApplicationDto>(`/applications/${id}`);
+}
+
 export async function fetchApplications(params: {
   page?: number;
   size?: number;
