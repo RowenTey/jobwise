@@ -23,7 +23,7 @@ export default function Sidebar() {
   return (
     <aside className="flex h-full w-64 flex-col border-r bg-sidebar">
       <div className="flex items-center gap-2 px-6 py-5">
-        <Briefcase className="h-6 w-6 text-primary" />
+        <img src="/logo.png" alt="JobWise" className="h-6 w-6" />
         <span className="text-lg font-semibold">JobWise</span>
       </div>
 

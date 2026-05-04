@@ -11,7 +11,7 @@
 - **Build tool**: Maven (`mvn` directly).
 - **Run**: `cd server && mvn spring-boot:run` (or `java -jar target/jobwise-0.0.1-SNAPSHOT.jar`).
 - **Tests**: 37 tests (JUnit 5 + Mockito). Run `mvn test` to verify.
-- **Database**: SQLite via Hibernate community dialect. Flyway migrations enabled (`src/main/resources/db/migration`). DB file defaults to `jobwise.db` at repo root.
+- **Database**: SQLite via Hibernate community dialect. Flyway migrations enabled (`src/main/resources/db/migration`). DB file defaults to `jobwise.db` at repo root. JDBC URL passes PRAGMAs: `journal_mode=WAL`, `temp_store=MEMORY`, `cache_size=-10000`. Override via `DB_URL` env var.
 - **Schema**: V1 migration creates 7 tables: `users`, `companies`, `jobs`, `applications`, `refresh_tokens`, `user_oauth_accounts`, `api_keys`.
 - **Entities**: User, RefreshToken, ApiKey, UserOAuthAccount, Application (→User, Job), Job (→Company), Company.
 - **Services**: AuthService, RefreshTokenService, OAuthService, UserService, ApiKeyService, ApplicationService, CompanyService, JobService.
@@ -75,6 +75,7 @@
   - `api-keys/CreateApiKeyDialog.tsx` — create form → one-time reveal dialog
   - `ui/*` — shadcn/ui components (button, input, label, card, table, badge, select, dialog, textarea, dropdown-menu, tooltip)
 - **UI**: Tailwind CSS v4 + shadcn/ui + lucide-react icons.
+- **Branding**: Logo (`public/logo.png`) and favicon match the extension. Purple theme (`oklch` hue 285-300) derived from extension's `#382bf0`–`#ba9ffb` palette. Sidebar displays `logo.png` as the brand mark instead of a generic icon.
 - **API layer** (`lib/api.ts`): Native `fetch` wrapper with:
   - Auto-attached `Authorization: Bearer` header
   - 401 interceptor: refresh token → retry once → redirect to login
