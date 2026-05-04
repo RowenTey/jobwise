@@ -1,9 +1,9 @@
 # AGENTS.md — JobWise
 
 ## Repo layout
-- `server/` — Spring Boot 3 backend (Java 17, Maven).
-- `client/` — React 18 + Vite + TypeScript + Tailwind CSS v4 + shadcn/ui frontend.
-- `extension/` — Browser Extension (Manifest V3), TypeScript source compiled to `dist/` via `tsc` + `esbuild`.
+- `server/` — Spring Boot 3 backend (Java 17, Maven). See `server/README.md` for API docs, setup, env vars, and known issues.
+- `client/` — React 18 + Vite + TypeScript + Tailwind CSS v4 + shadcn/ui frontend. See `client/README.md` for pages, routes, components, and testing.
+- `extension/` — Browser Extension (Manifest V3), TypeScript source compiled to `dist/` via `tsc` + `esbuild`. See `extension/README.md` for setup, extractor architecture, supported sites, and development guide.
 
 ---
 
