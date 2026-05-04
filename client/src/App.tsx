@@ -4,6 +4,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import ApplicationsPage from "@/pages/ApplicationsPage";
+import ApplicationDetailPage from "@/pages/ApplicationDetailPage";
 import ApiKeysPage from "@/pages/ApiKeysPage";
 import type { ReactNode } from "react";
 
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route index element={<ApplicationsPage />} />
+            <Route path="applications/:id" element={<ApplicationDetailPage />} />
             <Route path="api-keys" element={<ApiKeysPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

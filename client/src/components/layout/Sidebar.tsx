@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { Briefcase, Key, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -11,6 +11,14 @@ const navItems = [
 
 export default function Sidebar() {
   const { logout } = useAuth();
+  const location = useLocation();
+
+  const isActive = (item: typeof navItems[number]) => {
+    if (item.to === "/") {
+      return location.pathname === "/" || location.pathname.startsWith("/applications");
+    }
+    return location.pathname.startsWith(item.to);
+  };
 
   return (
     <aside className="flex h-full w-64 flex-col border-r bg-sidebar">
@@ -25,10 +33,10 @@ export default function Sidebar() {
             key={item.to}
             to={item.to}
             end={item.to === "/"}
-            className={({ isActive }) =>
+            className={() =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive
+                isActive(item)
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )
