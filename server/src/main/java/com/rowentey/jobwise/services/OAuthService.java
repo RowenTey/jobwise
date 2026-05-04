@@ -187,7 +187,7 @@ public class OAuthService {
 
         HttpHeaders tokenHeaders = new HttpHeaders();
         tokenHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        tokenHeaders.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
+        tokenHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
 
         ResponseEntity<Map> tokenResponse = restTemplate.postForEntity(
                 "https://github.com/login/oauth/access_token",

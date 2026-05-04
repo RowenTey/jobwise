@@ -22,27 +22,4 @@ public interface ApplicationMapper {
     @Mapping(target = "user", source = "user")
     @Mapping(target = "job", source = "job")
     Application toEntity(ApplicationCreateRequest request, User user, Job job);
-
-    // @Mapping(target = "id", ignore = true)
-    // @Mapping(target = "applicationUrl", source =
-    // "incomingApplication.applicationUrl")
-    // @Mapping(target = "companyName", source = "incomingApplication.companyName")
-    // @Mapping(target = "companyUrl", source = "incomingApplication.companyUrl")
-    // @Mapping(target = "jobTitle", source = "incomingApplication.jobTitle")
-    // @Mapping(target = "jobDescription", source =
-    // "incomingApplication.jobDescription")
-    // @Mapping(target = "source", source = "incomingApplication.source")
-    // @Mapping(target = "remark", source = "incomingApplication.remark")
-    // @Mapping(target = "coverLetter", source = "incomingApplication.coverLetter")
-    // @Mapping(target = "status", source = "incomingApplication.status")
-    // @Mapping(target = "appliedDate", source = "incomingApplication.appliedDate")
-    // @Mapping(target = "notes", source = "incomingApplication.notes")
-    // @Mapping(target = "nextActionDate", source =
-    // "incomingApplication.nextActionDate")
-    // @Mapping(target = "lastUpdated", source = "incomingApplication.lastUpdated")
-    // @Mapping(target = "job", source = "job")
-    // @Mapping(target = "user", ignore = true)
-    // @Mapping(target = "createdOn", ignore = true)
-    // void updateEntity(@MappingTarget Application existingApplication,
-    // Application incomingApplication, Job job);
 }

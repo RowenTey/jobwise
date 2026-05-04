@@ -1,10 +1,12 @@
 package com.rowentey.jobwise.mapper;
 
-import com.rowentey.jobwise.models.RefreshToken;
-import com.rowentey.jobwise.models.User;
 import java.util.Date;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import com.rowentey.jobwise.models.RefreshToken;
+import com.rowentey.jobwise.models.User;
 
 @Mapper(componentModel = "spring")
 public interface RefreshTokenMapper {

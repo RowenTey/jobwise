@@ -10,7 +10,8 @@
 ## Server (`server/`)
 - **Build tool**: Maven (`mvn` directly).
 - **Run**: `cd server && mvn spring-boot:run` (or `java -jar target/jobwise-0.0.1-SNAPSHOT.jar`).
-- **Tests**: 37 tests (JUnit 5 + Mockito). Run `mvn test` to verify.
+- **Tests**: 40 tests (JUnit 5 + Mockito). Run `mvn test` to verify.
+- **Lint**: Checkstyle configured. Run `mvn checkstyle:check` to verify coding standards.
 - **Database**: SQLite via Hibernate community dialect. Flyway migrations enabled (`src/main/resources/db/migration`). DB file defaults to `jobwise.db` at repo root. JDBC URL passes PRAGMAs: `journal_mode=WAL`, `temp_store=MEMORY`, `cache_size=-10000`. Override via `DB_URL` env var.
 - **Schema**: V1 migration creates 7 tables: `users`, `companies`, `jobs`, `applications`, `refresh_tokens`, `user_oauth_accounts`, `api_keys`.
 - **Entities**: User, RefreshToken, ApiKey, UserOAuthAccount, Application (→User, Job), Job (→Company), Company.
@@ -19,7 +20,6 @@
   - `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`.
   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`.
   - `JWT_SECRET` defaults to `test` in `application.yml`.
-  - **Missing from `.env.example`**: `GEMINI_API_KEY` (used in CI but not in template).
 - **API**: Base path `/api/v1`. Swagger UI at `/swagger-ui/index.html`.
 - **Auth**: JWT access/refresh token pair. `/api/v1/auth/**` and `/actuator/health/**` are unsecured.
   - Login: `POST /api/v1/auth/login` → `{ accessToken, refreshToken }`.
@@ -130,8 +130,11 @@
 ---
 
 ## CI / Deploy
-- `.github/workflows/server.deploy.yml` — push to `master` with `server/**` changes. Uses `actions/checkout@v2`, `actions/setup-java@v2`, `docker/setup-buildx-action@v1`. Runs `mvn test` then builds Docker image `neozenith1501/jobwise:server-latest`.
-- `.github/workflows/client.deploy.yml` — push to `master` with `client/**` changes (no `workflow_dispatch`). Uses `actions/checkout@v3`. Runs `npm run build` then builds image `neozenith1501/jobwise:client-latest`.
+- `.github/workflows/deploy.yml` — unified deploy pipeline. Triggers on `push` to `main`, `v*` tags, and `workflow_dispatch`. Three sequential jobs:
+  1. **client** — `npm ci`, `npm run lint`, `npm test`, `npm run build:server` (outputs to `server/src/main/resources/static/`)
+  2. **server** — `mvn checkstyle:check`, `mvn test`, `mvn clean package -DskipTests` (produces fat JAR with embedded static assets)
+  3. **docker** — builds and pushes `ghcr.io/rowentey/jobwise` with `latest` (for `main`) and semver tags (for `v*` tags)
+- Uses `GITHUB_TOKEN` for GHCR auth (no Docker Hub secrets required).
 - No root-level orchestration (`docker-compose.yml`), no CI for `extension/`, no root-level `package.json` or `pom.xml`.
 
 ---
@@ -140,9 +143,7 @@
 
 ### Critical (blocks functionality)
 - **Resume endpoints missing**: Client previously called `POST /resumes`, `GET /resumes`, `GET /resumes/{id}`, `GET /resumes/file/{id}`, `POST /gemini/resume` — none exist on server. **Client was reinit'd without these pages**. Server `.gitignore` still ignores `resumes/` directory.
-- **Application full-update missing**: Client sends `PUT /applications/{id}` with full body; server only has `PATCH /applications/{id}/status`. No full-update endpoint exists (`ApplicationMapper.updateEntity` is commented out). Extension reinit'd to only use PATCH status.
-- **Dockerfile JAR name mismatch**: `server/Dockerfile` expects `application-tracker-server-0.0.1-SNAPSHOT.jar`, Maven builds `jobwise-0.0.1-SNAPSHOT.jar`.
-- **Client Dockerfile**: Old `client/Dockerfile` was deleted during reinit. A new one needs to be created for production deployment.
+- **Application full-update missing**: Client sends `PUT /applications/{id}` with full body; server only has `PATCH /applications/{id}/status`. No full-update endpoint exists. Extension reinit'd to only use PATCH status.
 
 ### Auth & Security
 - **Server signup hardcodes default role "ADMIN"** in `AuthService.java` (line 49: `// TODO: Think through this flow`).
@@ -151,18 +152,13 @@
 - **JwtFilter** catches invalid/malformed JWTs and resolves them via `HandlerExceptionResolver` → `RestExceptionHandler` returning 401 JSON (not 403).
 
 ### Server issues
-- **`GEMINI_API_KEY` missing from `.env.example`** — present in CI secrets but not in template.
 - **`CompanyService.createCompany()` / `JobService.createJob()`** — catch-all `try/catch` with re-throw; duplicate names surface as raw 500 errors.
 - **`ApplicationDto` missing `createdAt` field** — only `lastUpdated` is mapped.
 - **`application.yml` JWT secret defaults to `"test"`** — insecure for production.
 - **Server README** contains Nginx deployment instructions instead of project documentation.
 
 ### CI / Deploy
-- **Client workflow lacks `workflow_dispatch`** — no manual trigger option.
-- **Server workflow uses older action versions** (`checkout@v2`, `setup-java@v2`).
 - **No `docker-compose.yml`** for unified local development.
 - **No CI for `extension/`** directory.
 - **No root-level `package.json` or orchestration**.
 - **`.vscode/launch.json`** has a Java debug config for `jobwise-be`.
-- **No client Dockerfile** — was removed during reinit.
-- **Client workflow will fail** — references old `client/` structure; needs update for new build process.

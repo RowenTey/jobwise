@@ -62,8 +62,6 @@ Static resources (`index.html`, JS/CSS bundles, assets) and frontend routes (`/l
 | `GOOGLE_CLIENT_SECRET` | `123` | Google OAuth client secret |
 | `GITHUB_CLIENT_ID` | `123` | GitHub OAuth client ID |
 | `GITHUB_CLIENT_SECRET` | `123` | GitHub OAuth client secret |
-| `GEMINI_API_KEY` | — | Gemini API key (used in CI) |
-
 See `.env.example`.
 
 ## API (base path: `/api/v1`)

@@ -33,64 +33,64 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Tag(name = "Applications", description = "Job Application APIs")
 public class ApplicationController {
-        private final ApplicationService applicationService;
+    private final ApplicationService applicationService;
 
-        @Operation(summary = "Get applications for user with optional filters")
-        @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation", content = {
-                        @Content(mediaType = "application/json", schema = @Schema(implementation = ApplicationDto.class)) }) })
-        @GetMapping
-        public ResponseEntity<Page<ApplicationDto>> getApplications(
-                        @RequestParam(required = false) String status,
-                        @RequestParam(required = false) Long jobId,
-                        @RequestParam(required = false) Long companyId,
-                        @RequestParam(required = false) String fromDate,
-                        @RequestParam(required = false) String toDate,
-                        @RequestParam(defaultValue = "0") int page,
-                        @RequestParam(defaultValue = "20") int size,
-                        @RequestParam(defaultValue = "lastUpdated") String sort,
-                        @RequestParam(defaultValue = "desc") String direction,
-                        @AuthenticationPrincipal User user) {
-                return ResponseEntity.ok(applicationService.getApplications(user, status,
-                                jobId, companyId, fromDate, toDate, page, size, sort, direction));
-        }
+    @Operation(summary = "Get applications for user with optional filters")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation", content = {
+            @Content(mediaType = "application/json", schema = @Schema(implementation = ApplicationDto.class)) }) })
+    @GetMapping
+    public ResponseEntity<Page<ApplicationDto>> getApplications(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long jobId,
+            @RequestParam(required = false) Long companyId,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "lastUpdated") String sort,
+            @RequestParam(defaultValue = "desc") String direction,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(applicationService.getApplications(user, status,
+                jobId, companyId, fromDate, toDate, page, size, sort, direction));
+    }
 
-        @Operation(summary = "Get an application by ID")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Successful operation", content = {
-                                        @Content(mediaType = "application/json", schema = @Schema(implementation = ApplicationDto.class)) }),
-                        @ApiResponse(responseCode = "404", description = "Application not found"),
-                        @ApiResponse(responseCode = "403", description = "Application does not belong to the current user") })
-        @GetMapping("/{id}")
-        public ResponseEntity<ApplicationDto> getApplicationById(
-                        @PathVariable Long id,
-                        @AuthenticationPrincipal User user) {
-                return ResponseEntity.ok(applicationService.getApplicationById(user, id));
-        }
+    @Operation(summary = "Get an application by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ApplicationDto.class)) }),
+            @ApiResponse(responseCode = "404", description = "Application not found"),
+            @ApiResponse(responseCode = "403", description = "Application does not belong to the current user") })
+    @GetMapping("/{id}")
+    public ResponseEntity<ApplicationDto> getApplicationById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(applicationService.getApplicationById(user, id));
+    }
 
-        @Operation(summary = "Create a new application")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "201", description = "Application created successfully", content = {
-                                        @Content(mediaType = "application/json", schema = @Schema(implementation = Long.class)) }) })
-        @PostMapping
-        public ResponseEntity<Long> createApplication(
-                        @Valid @RequestBody ApplicationCreateRequest request,
-                        @AuthenticationPrincipal User user) {
-                return new ResponseEntity<>(
-                                applicationService.createApplication(user, request),
-                                HttpStatus.CREATED);
-        }
+    @Operation(summary = "Create a new application")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Application created successfully", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = Long.class)) }) })
+    @PostMapping
+    public ResponseEntity<Long> createApplication(
+            @Valid @RequestBody ApplicationCreateRequest request,
+            @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(
+                applicationService.createApplication(user, request),
+                HttpStatus.CREATED);
+    }
 
-        @Operation(summary = "Update application status")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Application status updated successfully"),
-                        @ApiResponse(responseCode = "404", description = "Application not found"),
-                        @ApiResponse(responseCode = "403", description = "Application does not belong to the current user") })
-        @PatchMapping("/{id}/status")
-        public ResponseEntity<ApplicationDto> updateStatus(
-                        @PathVariable Long id,
-                        @Valid @RequestBody UpdateStatusRequest request,
-                        @AuthenticationPrincipal User user) {
-                return ResponseEntity.ok(
-                                applicationService.updateStatus(user, id, request.getStatus()));
-        }
+    @Operation(summary = "Update application status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Application status updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Application not found"),
+            @ApiResponse(responseCode = "403", description = "Application does not belong to the current user") })
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ApplicationDto> updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateStatusRequest request,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(
+                applicationService.updateStatus(user, id, request.getStatus()));
+    }
 }

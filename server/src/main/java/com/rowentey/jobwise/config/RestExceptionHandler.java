@@ -57,7 +57,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         log.error("Unhandled exception", ex);
-        return new ResponseEntity<>(new ErrorResponse("Error occured - " + ex.getMessage()),
+        return new ResponseEntity<>(new ErrorResponse("Error occurred - " + ex.getMessage()),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
