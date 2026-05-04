@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -8,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, ExternalLink } from "lucide-react";
 import { fetchApplications } from "@/lib/api";
 import type { ApplicationDto, PaginatedResponse } from "@/types";
 import StatusBadge from "./StatusBadge";
@@ -27,9 +28,11 @@ const columns = [
   { key: "job.location", label: "Location", sortable: true },
   { key: "lastUpdated", label: "Last Updated", sortable: true },
   { key: "notes", label: "Notes", sortable: false },
+  { key: "externalUrl", label: "Link", sortable: false },
 ];
 
 export default function ApplicationsTable({ statusFilter }: { statusFilter?: string }) {
+  const navigate = useNavigate();
   const [data, setData] = useState<PaginatedResponse<ApplicationDto> | null>(null);
   const [page, setPage] = useState(0);
   const [sort, setSort] = useState<SortConfig>({ column: "lastUpdated", direction: "desc" });
@@ -98,16 +101,8 @@ export default function ApplicationsTable({ statusFilter }: { statusFilter?: str
               </TableRow>
             ) : (
               apps.map((app) => (
-                <TableRow key={app.id}>
-                  <TableCell className="font-medium">
-                    {app.job.externalUrl ? (
-                      <a href={app.job.externalUrl} target="_blank" rel="noreferrer" className="hover:underline">
-                        {app.job.title}
-                      </a>
-                    ) : (
-                      app.job.title
-                    )}
-                  </TableCell>
+                <TableRow key={app.id} className="cursor-pointer" onClick={() => navigate(`/applications/${app.id}`)}>
+                  <TableCell className="font-medium">{app.job.title}</TableCell>
                   <TableCell>{app.job.company.name}</TableCell>
                   <TableCell><StatusBadge status={app.status} /></TableCell>
                   <TableCell>{app.source}</TableCell>
@@ -118,6 +113,13 @@ export default function ApplicationsTable({ statusFilter }: { statusFilter?: str
                   </TableCell>
                   <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
                     {app.notes || "-"}
+                  </TableCell>
+                  <TableCell>
+                    {app.job.externalUrl && (
+                      <a href={app.job.externalUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                        <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                      </a>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
