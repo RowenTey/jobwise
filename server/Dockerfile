@@ -2,7 +2,7 @@ FROM eclipse-temurin:17-jdk-alpine
 
 EXPOSE 8080
 
-ARG JAR_FILE=target/jobwise-0.0.1-SNAPSHOT.jar
+ARG JAR_FILE=target/jobwise-0.0.1.jar
 
 ADD ${JAR_FILE} app.jar
 

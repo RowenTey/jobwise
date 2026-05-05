@@ -139,4 +139,3 @@ Use MapStruct mappers for entity-to-DTO mapping (e.g. `ApplicationMapper`). Pref
 - `ApplicationStatus.fromString()` returns null for invalid values instead of throwing
 - `GEMINI_API_KEY` missing from `.env.example`
 - `application.yml` JWT secret defaults to `"test"`
-- Dockerfile JAR name mismatch: `server/Dockerfile` references `application-tracker-server-0.0.1-SNAPSHOT.jar` but Maven builds `jobwise-0.0.1-SNAPSHOT.jar`. Update `ARG JAR_FILE` before building.

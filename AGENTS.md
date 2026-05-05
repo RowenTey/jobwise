@@ -9,7 +9,7 @@
 
 ## Server (`server/`)
 - **Build tool**: Maven (`mvn` directly).
-- **Run**: `cd server && mvn spring-boot:run` (or `java -jar target/jobwise-0.0.1-SNAPSHOT.jar`).
+- **Run**: `cd server && mvn spring-boot:run` (or `java -jar target/jobwise-0.0.1.jar`).
 - **Tests**: 40 tests (JUnit 5 + Mockito). Run `mvn test` to verify.
 - **Lint**: Checkstyle configured. Run `mvn checkstyle:check` to verify coding standards.
 - **Database**: SQLite via Hibernate community dialect. Flyway migrations enabled (`src/main/resources/db/migration`). DB file defaults to `jobwise.db` at repo root. JDBC URL passes PRAGMAs: `journal_mode=WAL`, `temp_store=MEMORY`, `cache_size=-10000`. Override via `DB_URL` env var.
@@ -37,7 +37,6 @@
 - **CORS**: Allows all origins (`WebSecurityConfig`).
 - **Codegen**: MapStruct + Lombok annotation processors configured; generated mappers land in `target/generated-sources/annotations`.
 - **Response DTOs**: Use MapStruct mappers (e.g. `ApiKeyMapper`) for entity→dto mapping. Prefer constructor-based DTOs (`@Getter` + `@AllArgsConstructor`) over `@Data` with setters.
-- **Dockerfile mismatch**: `server/Dockerfile` references `target/application-tracker-server-0.0.1-SNAPSHOT.jar`, but Maven builds `target/jobwise-0.0.1-SNAPSHOT.jar`. Update `ARG JAR_FILE` before building.
 - **SPA serving**: Server can serve the React frontend from `src/main/resources/static/`. The `SpaFallbackController` forwards `/login`, `/signup`, `/applications/**`, `/api-keys` to `index.html` for client-side routing. Static files and SPA routes are `permitAll()` in `WebSecurityConfig`; API routes remain authenticated.
 - **Server README** has unrelated Nginx deployment instructions (not Spring Boot docs).
 
