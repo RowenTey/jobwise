@@ -10,6 +10,7 @@
 ## Server (`server/`)
 - **Build tool**: Maven (`mvn` directly).
 - **Run**: `cd server && mvn spring-boot:run` (or `java -jar target/jobwise-0.0.1.jar`).
+- **Docker**: Multi-stage `Dockerfile` — Maven build stage compiles the fat JAR, JRE runtime stage runs it as a non-root user.
 - **Tests**: 40 tests (JUnit 5 + Mockito). Run `mvn test` to verify.
 - **Lint**: Checkstyle configured. Run `mvn checkstyle:check` to verify coding standards.
 - **Database**: SQLite via Hibernate community dialect. Flyway migrations enabled (`src/main/resources/db/migration`). DB file defaults to `jobwise.db` at repo root. JDBC URL passes PRAGMAs: `journal_mode=WAL`, `temp_store=MEMORY`, `cache_size=-10000`. Override via `DB_URL` env var.
@@ -131,8 +132,8 @@
 ## CI / Deploy
 - `.github/workflows/deploy.yml` — unified deploy pipeline. Triggers on `push` to `main`, `v*` tags, and `workflow_dispatch`. Three sequential jobs:
   1. **client** — `npm ci`, `npm run lint`, `npm test`, `npm run build:server` (outputs to `server/src/main/resources/static/`)
-  2. **server** — `mvn checkstyle:check`, `mvn test`, `mvn clean package -DskipTests` (produces fat JAR with embedded static assets)
-  3. **docker** — builds and pushes `ghcr.io/rowentey/jobwise` with `latest` (for `main`) and semver tags (for `v*` tags)
+  2. **server** — `mvn checkstyle:check`, `mvn test` (quality gates)
+  3. **docker** — multi-stage `server/Dockerfile` builds the fat JAR inside the image (Maven build stage + JRE runtime stage) and pushes `ghcr.io/rowentey/jobwise` with `latest` (for `main`) and semver tags (for `v*` tags)
 - Uses `GITHUB_TOKEN` for GHCR auth (no Docker Hub secrets required).
 - No root-level orchestration (`docker-compose.yml`), no CI for `extension/`, no root-level `package.json` or `pom.xml`.
 
