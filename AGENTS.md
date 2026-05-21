@@ -96,7 +96,10 @@
 - **Build**: `npm run build` (type-check + bundle). `npm run watch` uses esbuild in watch mode.
 - **Structure**: 14 TypeScript source files (`src/` + `src/extractors/`), 4 HTML templates (`templates/`), 1 CSS file (`css/`).
 - **Manifests**: Two variants — `manifest.json` (Firefox, uses `background.scripts`) and `manifest.chrome.json` (Chrome, uses `background.service_worker` + `host_permissions`).
+  - Firefox manifest includes `browser_specific_settings.gecko.id` (`jobwise@rowentey.github.io`) and `data_collection_permissions: { required: ["none"] }` for AMO compliance.
+  - `manifest.chrome.json` fixed: removed trailing comma in `content_scripts[0].js` array.
 - **Permissions**: `manifest.json` has `activeTab` + `storage`. `manifest.chrome.json` has explicit `host_permissions` per site + `storage`.
+- **Icons**: Three exact-size square PNGs (`assets/icon-16.png`, `icon-48.png`, `icon-128.png`) referenced in manifest. Original `assets/logo.png` padded to 308×308 for square compliance (retained for other uses).
 - **Auth**: API Key via `X-API-Key` header (no JWT). User configures key + URL in settings page.
 - **Settings** (`templates/settings.html` + `src/settings.ts`):
   - API Base URL (required, user-configurable, no hardcoded default).
@@ -135,7 +138,11 @@
   2. **server** — `mvn checkstyle:check`, `mvn test` (quality gates)
   3. **docker** — multi-stage `server/Dockerfile` builds the fat JAR inside the image (Maven build stage + JRE runtime stage) and pushes `ghcr.io/rowentey/jobwise` with `latest` (for `main`) and semver tags (for `v*` tags)
 - Uses `GITHUB_TOKEN` for GHCR auth (no Docker Hub secrets required).
-- No root-level orchestration (`docker-compose.yml`), no CI for `extension/`, no root-level `package.json` or `pom.xml`.
+- `.github/workflows/deploy-extension.yml` — standalone Firefox extension deploy pipeline. Triggers on `workflow_dispatch`.
+  1. **build-and-deploy** — `npm ci`, `npm run build`, `npx web-ext lint`, package into `jobwise-firefox.zip`, deploy to Mozilla Add-On Store via `trmcnvn/firefox-addon@v1`.
+  2. Secrets: `FIREFOX_API_KEY`, `FIREFOX_API_SECRET`.
+  3. First deploy creates a new AMO listing; `uuid` in workflow must be filled in after first run for subsequent updates.
+- No root-level orchestration (`docker-compose.yml`), no root-level `package.json` or `pom.xml`.
 
 ---
 
@@ -159,6 +166,5 @@
 
 ### CI / Deploy
 - **No `docker-compose.yml`** for unified local development.
-- **No CI for `extension/`** directory.
 - **No root-level `package.json` or orchestration**.
 - **`.vscode/launch.json`** has a Java debug config for `jobwise-be`.

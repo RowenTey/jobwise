@@ -1,5 +1,13 @@
 {
   "manifest_version": 3,
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "jobwise@rowentey.github.io",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
   "name": "JobWise",
   "version": "2.0",
   "description": "Track job applications across LinkedIn, Indeed, Greenhouse, and Lever.",
@@ -8,9 +16,9 @@
     "activeTab"
   ],
   "icons": {
-    "16": "assets/logo.png",
-    "48": "assets/logo.png",
-    "128": "assets/logo.png"
+    "16": "assets/icon-16.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
   },
   "background": {
     "scripts": [

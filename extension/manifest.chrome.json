@@ -30,7 +30,7 @@
       ],
       "js": [
         "dist/content.js"
-      ],
+      ]
     }
   ],
   "action": {
