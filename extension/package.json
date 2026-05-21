@@ -1,6 +1,6 @@
 {
   "name": "jobwise-extension",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "build": "tsc --noEmit && esbuild src/content.ts src/background.ts src/popup.ts src/settings.ts src/applications.ts src/application.ts --bundle --outdir=dist --format=iife",

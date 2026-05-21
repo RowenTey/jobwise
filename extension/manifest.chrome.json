@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "JobWise",
-  "version": "2.0",
+  "version": "0.0.1",
   "description": "Track job applications across LinkedIn, Indeed, Greenhouse, and Lever.",
   "permissions": [
     "storage"
