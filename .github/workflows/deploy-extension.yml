@@ -1,0 +1,47 @@
+name: Deploy Firefox Extension
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./extension
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './extension/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extension
+        run: npm run build
+
+      - name: Lint extension
+        run: npx web-ext lint
+
+      - name: Package extension
+        run: zip -r ../jobwise-firefox.zip manifest.json dist/ templates/ css/ assets/
+
+      - name: Deploy to Mozilla Add-On Store
+        uses: trmcnvn/firefox-addon@v1
+        with:
+          # Uncomment and fill in the uuid after the first successful deploy.
+          # The first run without uuid will create a new AMO listing.
+          # uuid: ''
+          xpi: jobwise-firefox.zip
+          manifest: extension/manifest.json
+          api-key: ${{ secrets.FIREFOX_API_KEY }}
+          api-secret: ${{ secrets.FIREFOX_API_SECRET }}
