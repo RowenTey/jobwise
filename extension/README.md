@@ -43,9 +43,6 @@ extension/
 │   └── extractors/             # Pluggable site extractors
 │       ├── base.ts             # SiteExtractor interface, FallbackExtractor, JSON-LD utils
 │       ├── linkedin.ts         # LinkedIn extractor
-│       ├── indeed.ts           # Indeed extractor
-│       ├── greenhouse.ts       # Greenhouse extractor
-│       ├── lever.ts            # Lever extractor
 │       └── index.ts            # Registry: hostname → extractor
 ├── templates/                  # HTML pages for the extension
 │   ├── popup.html
@@ -76,9 +73,6 @@ The content script uses a **pluggable extractor pattern** to support multiple jo
 content.ts               # Entry: detects site, wires click/MutationObserver
   └── getExtractor()     # Registry in extractors/index.ts
         ├── LinkedInExtractor   (hostname includes "linkedin.com")
-        ├── IndeedExtractor     (hostname includes "indeed.com")
-        ├── GreenhouseExtractor (hostname includes "greenhouse.io" + /jobs/\d+)
-        ├── LeverExtractor      (hostname includes "lever.co" + /jobs/)
         └── FallbackExtractor   (always matches — last resort)
 ```
 
@@ -140,17 +134,6 @@ The shared utility `parseJsonLdJobPosting()` in `base.ts` extracts job data from
 - `FULL_TIME`, `PART_TIME`, `CONTRACT`, `INTERNSHIP`
 
 This is used as the primary data source by all extractors, with DOM selectors as fallback.
-
-## Auto-Fill
-
-Currently only supports LinkedIn Easy Apply. When a modal matching LinkedIn's selectors appears (detected via `MutationObserver`), the extension fills stored profile fields (name, email, phone, LinkedIn URL) into matching form inputs by label text.
-
-## Known Limitations
-
-- Workday job listings are handled by the generic `FallbackExtractor` (meta tags + JSON-LD only; no reliable DOM selectors)
-- Apply button clicks that navigate away from the page (e.g., Greenhouse → external application) may lose the response callback, but the message is delivered before navigation
-- No auto-fill for Indeed, Greenhouse, or Lever application forms
-- `isApplyButton()` is heuristic-based; false positives/negatives possible on uncommon site layouts
 
 ## Browser-Specific Manifests
 
