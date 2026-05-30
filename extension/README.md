@@ -65,10 +65,6 @@ extension/
 | Site | URL Pattern | Apply Button Detection | Auto-Fill |
 |------|-------------|----------------------|-----------|
 | LinkedIn | `linkedin.com/jobs/*` | Text contains "apply" | Yes (Easy Apply modal) |
-| Indeed | `*.indeed.com/*` | "Apply now", "Apply with Indeed" | No |
-| Greenhouse | `boards.greenhouse.io/jobs/*` | Exact text "Apply" or "Apply for this job" | No |
-| Lever | `jobs.lever.co/jobs/*` | "Apply for this job" or "Apply" | No |
-| Other sites | Any | Generic text heuristic | No |
 
 All extractors attempt JSON-LD `JobPosting` schema parsing before falling back to DOM selectors.
 
